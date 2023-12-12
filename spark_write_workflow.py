@@ -11,6 +11,15 @@ from logging.handlers import RotatingFileHandler
 from pyspark.sql import functions as F
 import time
 
+
+def set_df_columns_nullable(spark: SparkSession, df, column_list, nullable=True):
+    for struct_field in df.schema:
+        if struct_field.name in column_list:
+            struct_field.nullable = nullable
+    df_mod = spark.createDataFrame(df.rdd, df.schema)
+    return df_mod
+
+
 if __name__ == '__main__':
     logger = logging.getLogger('spark')
     logger.setLevel('INFO')
@@ -103,6 +112,7 @@ if __name__ == '__main__':
                     for i in range(2):
                         try:
                             df = spark.read.jdbc(url=url, table=final_sql, properties=properties)
+                            df = set_df_columns_nullable(spark,df,['workflow_id','create_time'],nullable=False)
                             # df = df.withColumn("create_time", F.from_utc_timestamp(df["create_time"], "Asia/Shanghai"))
                             # df = df.withColumn("create_time", F.from_utc_timestamp(df["update_time"], "Asia/Shanghai"))
                             break
@@ -140,6 +150,7 @@ if __name__ == '__main__':
             for i in range(2):
                 try:
                     df = spark.read.jdbc(url=url, table=sql % (start_dt, end_dt), properties=properties)
+                    df = set_df_columns_nullable(spark,df,['workflow_id','create_time'],nullable=False)
                     # df = df.withColumn("create_time", F.from_utc_timestamp(df["create_time"], "Asia/Shanghai"))
                     # df = df.withColumn("create_time", F.from_utc_timestamp(df["update_time"], "Asia/Shanghai"))
                     break
@@ -166,8 +177,8 @@ if __name__ == '__main__':
                 logger.error(f'#{i}:迁移 {start_dt} 到 {end_dt} 的数据，共 {results_cnt} 条，已迁移 {offset} 条. Unpersist error: {e}')
                 raise Exception(f'#{i}:迁移 {start_dt} 到 {end_dt} 的数据，共 {results_cnt} 条，已迁移 {offset} 条. Unpersist error: {e}')
             
-    START_DATE = datetime(2023,8,12)
-    END_DATE = datetime(2023,11,23)
+    START_DATE = datetime(2023,12,5)
+    END_DATE = datetime(2023,12,9)
     with db.connect() as conn:
         for date in pd.date_range(START_DATE,END_DATE):
             for h in range(24):

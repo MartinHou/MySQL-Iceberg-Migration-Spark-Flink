@@ -59,11 +59,17 @@ def check_workflow_cnt(start,end):
     return mysql_cnt
     
 mysql_cnt=0
-last = datetime(2023,8,4)
-for date in pd.date_range(last,datetime(2023,9,1)):
+
+check_workflow = False
+last = datetime(2023,12,1)
+for date in pd.date_range(last,datetime(2023,12,11)):
     # if date.day==1:
         # trino_cnt = next(table.query_by_sql(trino_wf % (last, date)))['count']
-    trino_cnt = next(table.query_by_sql(trino % (last, date)))['count']
+    if check_workflow:
+        trino_cnt = next(table.query_by_sql(trino_wf % (last, date)))['count']
+    else:
+        trino_cnt = next(table.query_by_sql(trino % (last, date)))['count']
+        
     if trino_cnt!=mysql_cnt:
         logger.error(f'{last} - {date}: MySQL {mysql_cnt}, Iceberg {trino_cnt} Not Match!!')
         print(f'{last} - {date}: MySQL {mysql_cnt}, Iceberg {trino_cnt} Not Match!!')
@@ -76,8 +82,10 @@ for date in pd.date_range(last,datetime(2023,9,1)):
     for h in range(24):
         start = date + timedelta(hours=h)
         end = date + timedelta(hours=h+1)
-        # mysql_cnt += check_workflow_cnt(start,end)
-        mysql_cnt += check_cnt(start,end)
+        if check_workflow:
+            mysql_cnt += check_workflow_cnt(start,end)
+        else:
+            mysql_cnt += check_cnt(start,end)
         
         
         

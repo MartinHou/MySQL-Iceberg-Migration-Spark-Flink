@@ -177,8 +177,8 @@ if __name__ == '__main__':
                 logger.error(f'#{i}:迁移 {start_dt} 到 {end_dt} 的数据，共 {results_cnt} 条，已迁移 {offset} 条. Unpersist error: {e}')
                 raise Exception(f'#{i}:迁移 {start_dt} 到 {end_dt} 的数据，共 {results_cnt} 条，已迁移 {offset} 条. Unpersist error: {e}')
             
-    START_DATE = datetime(2023,9,18)
-    END_DATE = datetime(2023,11,24)
+    START_DATE = datetime(2023,12,5)
+    END_DATE = datetime(2023,12,6)
     with db.connect() as conn:
         for date in pd.date_range(START_DATE,END_DATE):
             for h in range(24):

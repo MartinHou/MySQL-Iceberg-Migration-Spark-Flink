@@ -3,6 +3,7 @@ from util.db_util import get_engine
 from datetime import datetime, timedelta
 import logging
 from logging.handlers import RotatingFileHandler
+import multiprocessing
 
 db = get_engine('etc/prod_mysql.conf')
 
@@ -32,7 +33,7 @@ def delete_expired_data(start,end):
     with db.connect() as conn:
         current_time = start
         while current_time < end:
-            next_time = current_time + hour
+            next_time = min(end,current_time + hour)
             
             workflows = conn.execute(query_workflow %(current_time, next_time)).fetchall()
             workflow_id_list = [row[0] for row in workflows]
@@ -46,7 +47,20 @@ def delete_expired_data(start,end):
                 # print(delete_workflow % workflow_id)
 
             current_time = next_time
-        
-       
-START,END = datetime(2023,8,1),datetime(2023,11,1)
-delete_expired_data(START, END)
+
+def delete_expired_data_parallel(start, end, num_processes):
+    delta = (end - start) / num_processes
+    processes= []
+    for i in range(num_processes):
+        process_start = start + i * delta
+        process_end = process_start + delta
+        p = multiprocessing.Process(target=delete_expired_data, args=(process_start, process_end))
+        p.start()
+        processes.append(p)
+    
+    for p in processes:
+        p.join()
+
+START, END = datetime(2023, 11, 20,17,8), datetime(2023, 12, 1)
+NUM_PROCESSES = 7
+delete_expired_data_parallel(START, END, NUM_PROCESSES)

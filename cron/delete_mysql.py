@@ -1,4 +1,3 @@
-import pandas as pd
 from util.db_util import get_engine
 from datetime import datetime, timedelta
 
