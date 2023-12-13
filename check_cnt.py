@@ -61,8 +61,8 @@ def check_workflow_cnt(start,end):
 mysql_cnt=0
 
 check_workflow = False
-last = datetime(2023,12,1)
-for date in pd.date_range(last,datetime(2023,12,11)):
+last = datetime(2023,12,7)
+for date in pd.date_range(last,datetime(2023,12,8)):
     # if date.day==1:
         # trino_cnt = next(table.query_by_sql(trino_wf % (last, date)))['count']
     if check_workflow:

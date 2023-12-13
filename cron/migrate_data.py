@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 
 ICEBERG_RESULT_TABLE = 'result_test'
 ICEBERG_WORKFLOW_TABLE = 'workflow_test'
+OFFSET_DAYS = 30
 
 def insert_iceberg(table_env: StreamTableEnvironment, workflows):
     print(f'Inserting')
@@ -150,7 +151,7 @@ def run(start_date: datetime=None, end_date: datetime=None):
                       "'format-version'='2')")
     
     if start_date is None or end_date is None:
-        end_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        end_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=OFFSET_DAYS)
         start_date = end_date - timedelta(days=1)
         print(start_date, end_date)
         
